@@ -59,27 +59,29 @@ app.get('/', (req, res) => {
                 background-color: var(--c-void);
                 color: var(--c-text);
                 font-family: 'Montserrat', sans-serif;
-                height: 100vh;
-                overflow: hidden;
+                min-height: 100vh;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 background-image: radial-gradient(circle at 50% 100%, #0f2e1e 0%, #000000 90%);
+                overflow-x: hidden; /* Prevent horizontal scroll on mobile */
             }
 
             /* --- BACKGROUND --- */
-            #webgl-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+            #webgl-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
 
             /* --- THE SLASHED INTERFACE --- */
             .main-container {
                 position: relative;
-                width: 1200px;
-                height: 650px; /* Increased height slightly to fit the bigger avatar */
+                width: 90%; /* Responsive width */
+                max-width: 1200px; /* Max cap */
+                height: 650px;
                 z-index: 10;
                 display: flex;
                 justify-content: center;
                 align-items: center;
                 perspective: 1200px; 
+                margin: 2rem 0;
             }
 
             .slashed-card {
@@ -91,7 +93,7 @@ app.get('/', (req, res) => {
                 -webkit-backdrop-filter: blur(20px);
                 border: 1px solid var(--c-glass-border);
                 
-                /* THE UNIQUE SHAPE */
+                /* THE UNIQUE SHAPE - Desktop */
                 clip-path: polygon(
                     5% 0%, 
                     100% 0%, 
@@ -104,7 +106,6 @@ app.get('/', (req, res) => {
                 display: grid;
                 grid-template-columns: 1.3fr 1fr;
                 box-shadow: 0 0 50px rgba(0, 255, 136, 0.1);
-                overflow: hidden;
                 transform-style: preserve-3d;
             }
 
@@ -125,10 +126,10 @@ app.get('/', (req, res) => {
 
             /* --- LEFT: INFO HUD --- */
             .info-panel {
-                padding: 40px 60px; /* Reduced top/bottom padding to make room */
+                padding: 40px 60px;
                 display: flex;
                 flex-direction: column;
-                justify-content: center; /* Center content vertically */
+                justify-content: center; 
                 position: relative;
                 z-index: 5;
             }
@@ -160,19 +161,18 @@ app.get('/', (req, res) => {
             .status-dot { width: 8px; height: 8px; background: var(--c-zoro-green); border-radius: 50%; box-shadow: 0 0 10px var(--c-zoro-green); }
             .status-text { font-family: 'Orbitron'; font-size: 0.8rem; letter-spacing: 3px; color: var(--c-zoro-green); }
 
-            /* --- NEW AVATAR POSITION --- */
+            /* --- AVATAR --- */
             .avatar-lockup {
-                width: 180px;  /* Bigger Size */
-                height: 180px; /* Bigger Size */
+                width: 180px;
+                height: 180px;
                 position: relative;
-                margin-bottom: 20px; /* Space between image and name */
+                margin-bottom: 20px;
                 flex-shrink: 0;
             }
 
             .hex-avatar {
                 width: 100%; height: 100%;
                 object-fit: cover;
-                /* Hexagon Shape */
                 clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
                 background: #111;
                 filter: grayscale(0.2) contrast(1.1);
@@ -181,7 +181,6 @@ app.get('/', (req, res) => {
                 z-index: 2;
             }
             
-            /* Decorative border for the hex */
             .avatar-lockup::after {
                 content: '';
                 position: absolute;
@@ -194,7 +193,7 @@ app.get('/', (req, res) => {
 
             .main-identity h1 {
                 font-family: 'Cinzel', serif;
-                font-size: 3.8rem;
+                font-size: clamp(2.5rem, 5vw, 3.8rem); /* Responsive Font */
                 line-height: 0.9;
                 color: #fff;
                 text-shadow: 2px 2px 0px var(--c-zoro-dark);
@@ -212,6 +211,7 @@ app.get('/', (req, res) => {
                 display: flex;
                 gap: 40px;
                 margin-top: 30px;
+                flex-wrap: wrap; /* Allow wrapping on small screens */
             }
             .stat-box { display: flex; flex-direction: column; }
             .stat-label { font-size: 0.7rem; color: var(--c-text-muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px;}
@@ -221,6 +221,7 @@ app.get('/', (req, res) => {
             .visual-panel {
                 position: relative;
                 height: 100%;
+                /* Desktop Cut */
                 clip-path: polygon(15% 0, 100% 0, 100% 100%, 0% 100%);
                 margin-left: -40px; 
                 background: #000;
@@ -269,17 +270,70 @@ app.get('/', (req, res) => {
             .bounty-label-sm { font-size: 0.7rem; letter-spacing: 2px; color: var(--c-zoro-green); }
             .bounty-val-sm { font-family: 'Orbitron'; font-size: 1.5rem; font-weight: 700; color: #fff; }
 
-            /* --- MOBILE --- */
-            @media (max-width: 1000px) {
-                .main-container { width: 95vw; height: auto; }
-                .slashed-card { grid-template-columns: 1fr; height: auto; clip-path: none; border-radius: 10px; }
-                .visual-panel { height: 300px; clip-path: none; margin-left: 0; order: 1; border-bottom: 2px solid var(--c-zoro-green); }
-                .info-panel { order: 2; padding: 30px; align-items: center; text-align: center; }
-                .header-row { margin: 0 auto 20px auto; }
-                .stats-row { justify-content: center; }
+            /* --- RESPONSIVE BREAKPOINTS --- */
+            
+            /* Tablet and Mobile (< 1024px) */
+            @media (max-width: 1024px) {
+                body {
+                    height: auto; /* Allow scrolling */
+                    padding: 40px 0;
+                }
+                .main-container { 
+                    width: 95%; 
+                    height: auto; 
+                }
+                .slashed-card { 
+                    grid-template-columns: 1fr; /* Stack Vertically */
+                    height: auto; 
+                    clip-path: none; /* Remove slash shape */
+                    border-radius: 16px; 
+                }
+                
+                /* Reorder: Info top, Visual bottom */
+                .info-panel { 
+                    order: 1; 
+                    padding: 40px 30px; 
+                    align-items: center; 
+                    text-align: center; 
+                }
+                
+                .visual-panel { 
+                    order: 2;
+                    height: 400px; 
+                    clip-path: none; 
+                    margin-left: 0; 
+                    border-top: 2px solid var(--c-zoro-green); 
+                    border-radius: 0 0 16px 16px;
+                }
+
+                .slash-line { display: none; } /* Hide the slash decoration */
+                
+                /* Center elements in info panel */
+                .header-row { margin: 0 auto 25px auto; }
+                .avatar-lockup { margin: 0 auto 20px auto; }
+                .stats-row { justify-content: center; gap: 20px; }
                 .stat-val { border-left: none; border-bottom: 3px solid var(--c-zoro-green); padding-left: 0; padding-bottom: 5px; }
-                .slash-line { display: none; }
-                .watermark-bounty { display: none; }
+                
+                /* Adjust Watermark */
+                .watermark-bounty {
+                    font-size: 5rem;
+                    top: 10px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    opacity: 0.03;
+                }
+            }
+
+            /* Small Mobile (< 600px) */
+            @media (max-width: 600px) {
+                .visual-panel { height: 300px; }
+                .quote-box { bottom: 20px; left: 20px; width: 90%; }
+                .quote-text { font-size: 0.8rem; }
+                .bounty-val-sm { font-size: 1.2rem; }
+                .main-identity h1 { font-size: 2.5rem; }
+                
+                /* Scale down avatar slightly */
+                .avatar-lockup { width: 140px; height: 140px; }
             }
         </style>
     </head>
@@ -363,30 +417,31 @@ app.get('/', (req, res) => {
             // --- 2. MOUSE PARALLAX ---
             const inner = document.getElementById('card-inner');
             const zoroBg = document.querySelector('.bg-zoro');
-            // Target the new avatar class for parallax
             const avatar = document.querySelector('.avatar-lockup'); 
 
-            document.addEventListener('mousemove', (e) => {
-                const x = e.clientX;
-                const y = e.clientY;
-                
-                const cx = window.innerWidth / 2;
-                const cy = window.innerHeight / 2;
-                
-                const dx = (x - cx) / 65; 
-                const dy = (y - cy) / 65;
+            // Only enable tilt on larger screens to save battery/performance on mobile
+            if (window.matchMedia("(min-width: 1025px)").matches) {
+                document.addEventListener('mousemove', (e) => {
+                    const x = e.clientX;
+                    const y = e.clientY;
+                    
+                    const cx = window.innerWidth / 2;
+                    const cy = window.innerHeight / 2;
+                    
+                    const dx = (x - cx) / 65; 
+                    const dy = (y - cy) / 65;
 
-                gsap.to(inner, { 
-                    rotationY: dx, 
-                    rotationX: -dy, 
-                    duration: 1, 
-                    ease: "power2.out" 
+                    gsap.to(inner, { 
+                        rotationY: dx, 
+                        rotationX: -dy, 
+                        duration: 1, 
+                        ease: "power2.out" 
+                    });
+
+                    gsap.to(zoroBg, { x: dx * 1.5, y: dy * 1.5, duration: 1.2 });
+                    gsap.to(avatar, { x: dx * 0.5, y: dy * 0.5, duration: 1.2 }); 
                 });
-
-                // Parallax elements
-                gsap.to(zoroBg, { x: dx * 1.5, y: dy * 1.5, duration: 1.2 });
-                gsap.to(avatar, { x: dx * 0.5, y: dy * 0.5, duration: 1.2 }); // Subtle movement for avatar
-            });
+            }
 
             // --- 3. PARTICLES ---
             const scene = new THREE.Scene();
